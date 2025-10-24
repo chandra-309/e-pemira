@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Voting - E-Pemira</title>
+	<link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+	<aside class="sidebar">
+		<div class="sidebar-header">
+			<h2>E-Pemira</h2>
+		</div>
+		<nav class="sidebar-nav">
+			<a href="/voting" class="nav-item active">
+				<span class="nav-icon">🗳️</span>
+				<span class="nav-text">Voting</span>
+			</a>
+		</nav>
+		<div class="sidebar-footer">
+			<div class="user-info">
+				<span class="user-role">Mahasiswa</span>
+			</div>
+			<form method="post" action="/logout" class="logout-form">
+				<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+				<button type="submit" class="btn btn-outline btn-sm">Logout</button>
+			</form>
+		</div>
+	</aside>
+
+	<main class="main-with-sidebar">
+		<div class="container">
+			<% if (flash.error && flash.error.length) { %>
+				<div class="card" style="border-color:#fecaca;background:#fef2f2;color:#991b1b;"> <%= flash.error[0] %> </div>
+			<% } %>
+			<% if (flash.success && flash.success.length) { %>
+				<div class="card" style="border-color:#bbf7d0;background:#f0fdf4;color:#166534;"> <%= flash.success[0] %> </div>
+			<% } %>
+			
+			<div class="hero">
+				   <h1>Pemilihan Ketua <%= orgName %></h1>
+				   <p>Pilih kandidat terbaik untuk memimpin <%= orgName %> periode 2026/2027</p>
+				<% if (user.hasVoted) { %>
+					<div class="alert alert-info">
+						<strong>Anda sudah melakukan voting!</strong> Terima kasih telah menggunakan hak suara Anda.
+					</div>
+				<% } else { %>
+					<div class="alert alert-warning">
+						<strong>Penting:</strong> Pastikan data yang Anda masukkan benar. Anda hanya bisa voting 1 kali.
+					</div>
+				<% } %>
+			</div>
+
+			<% if (!user.hasVoted) { %>
+				<form method="post" action="/voting" id="votingForm" autocomplete="off">
+					<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+					<div class="candidates-voting" id="candidatesVoting">
+						<% candidates.forEach(candidate => { %>
+							<div class="candidate-vote-card" data-candidate-id="<%= candidate._id %>">
+								<div class="candidate-content" style="text-align:center;">
+									<div class="candidate-number">No. <%= candidate.number %></div>
+									<img src="<%= candidate.photoPath || '/img/placeholder.svg' %>" alt="<%= candidate.name %>" class="candidate-photo" />
+									<h3><%= candidate.name %></h3>
+									<button type="button" class="visi-misi-toggle" data-nama="<%= candidate.name.replace(/'/g, '\'') %>" data-visi="<%- candidate.visi.replace(/"/g, '&quot;').replace(/'/g, '\'') %>" data-misi="<%- candidate.misi.replace(/"/g, '&quot;').replace(/'/g, '\'') %>">Lihat Visi & Misi</button>
+									<div style="margin-top:1rem;">
+										<label style="display:inline-flex;align-items:center;gap:0.5rem;cursor:pointer;">
+											<input type="radio" name="candidateId" value="<%= candidate._id %>" required />
+											<span>Pilih Calon Ini</span>
+										</label>
+									</div>
+								</div>
+							</div>
+						<% }); %>
+					</div>
+					<div class="kirim-suara-wrapper">
+						<button type="submit" class="btn btn-primary btn-lg" id="btnKirimSuara">Kirim Suara</button>
+					</div>
+				</form>
+												<!-- Hapus script toggle lama, hanya gunakan script modal -->
+
+			<% } else { %>
+				<div class="voted-info">
+					<h2>Terima kasih telah voting!</h2>
+					<p>Anda telah memilih: <strong>No. <%= user.votedCandidate.number %> - <%= user.votedCandidate.name %></strong></p>
+				</div>
+			<% } %>
+		</div>
+	</main>
+
+	   <footer class="footer-with-sidebar">
+		   <div class="container" style="text-align:center; padding:1rem 0; color:#888; font-size:15px;">
+			   &copy; <%= new Date().getFullYear() %> DEWAN PERWAKILAN MAHASISWA AKB. All rights reserved.
+		   </div>
+	   </footer>
+
+					<!-- Modal Visi Misi (letakkan di luar main agar tidak ter-clip) -->
+						<style>
+						#visiMisiModal {
+							display: none;
+							position: fixed;
+							z-index: 1000;
+							left: 0; top: 0;
+							width: 100vw; height: 100vh;
+							background: rgba(0,0,0,0.45);
+							align-items: center; justify-content: center;
+						}
+						#visiMisiModalBox {
+							background: #fff;
+							max-width: 420px;
+							width: 90vw;
+							padding: 2rem 1.5rem 1.5rem 1.5rem;
+							border-radius: 1.2rem;
+							box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+							position: relative;
+							text-align: left;
+							max-height: 80vh;
+							overflow-y: auto;
+							word-break: break-word;
+						}
+						#modalVisi, #modalMisi {
+							white-space: pre-line;
+							word-break: break-word;
+						}
+						@media (max-width: 500px) {
+							#visiMisiModalBox { padding: 1.2rem 0.5rem 1rem 0.5rem; }
+						}
+						</style>
+						<div id="visiMisiModal">
+							<div id="visiMisiModalBox">
+							<button id="closeVisiMisiModal" style="position:absolute;top:1rem;right:1rem;font-size:1.5rem;background:none;border:none;cursor:pointer;">&times;</button>
+							<h2 id="modalNamaKandidat" style="margin-bottom:1rem;font-size:1.3rem;font-weight:700;color:#1e293b"></h2>
+							<div style="margin-bottom:1rem;">
+								<h4 style="color:#2563eb;margin-bottom:0.3rem;">Visi</h4>
+								<div id="modalVisi" style="color:#334155;"></div>
+							</div>
+							<div>
+								<h4 style="color:#2563eb;margin-bottom:0.3rem;">Misi</h4>
+								<div id="modalMisi" style="color:#334155;"></div>
+							</div>
+						</div>
+					</div>
+					<script src="/js/lightbox.js"></script>
+					<script src="/js/visi-misi-modal.js"></script>
+					<script>
+					(function() {
+						// Modal visi misi
+						var modal = document.getElementById('visiMisiModal');
+						var closeBtn = document.getElementById('closeVisiMisiModal');
+						var namaKandidat = document.getElementById('modalNamaKandidat');
+						var visiDiv = document.getElementById('modalVisi');
+						var misiDiv = document.getElementById('modalMisi');
+						var votingDiv = document.getElementById('candidatesVoting');
+						if (votingDiv && modal && closeBtn && namaKandidat && visiDiv && misiDiv) {
+							votingDiv.addEventListener('click', function(e) {
+								if (e.target.classList.contains('visi-misi-toggle')) {
+									var nama = e.target.getAttribute('data-nama') || '';
+									var visi = e.target.getAttribute('data-visi') || '';
+									var misi = e.target.getAttribute('data-misi') || '';
+									namaKandidat.textContent = nama;
+									visiDiv.innerHTML = visi.replace(/\n/g, '<br>');
+									misiDiv.innerHTML = misi.replace(/\n/g, '<br>');
+									modal.style.display = 'flex';
+								}
+							});
+							closeBtn.addEventListener('click', function() {
+								modal.style.display = 'none';
+							});
+							modal.addEventListener('click', function(e) {
+								if (e.target === modal) modal.style.display = 'none';
+							});
+						}
+						// Enable/disable Kirim Suara button
+						var radios = document.querySelectorAll('input[type=radio][name=candidateId]');
+						var btnKirim = document.getElementById('btnKirimSuara');
+						function updateKirimState() {
+							if (!btnKirim) return;
+							btnKirim.disabled = !document.querySelector('input[type=radio][name=candidateId]:checked');
+						}
+						if (radios.length && btnKirim) {
+							radios.forEach(function(radio) {
+								radio.addEventListener('change', updateKirimState);
+							});
+							updateKirimState();
+						}
+						// Prevent submit jika tidak ada yang dipilih
+						var form = document.getElementById('votingForm');

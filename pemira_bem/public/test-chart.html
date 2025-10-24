@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Chart</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 2rem; background: #f8fafc; }
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem; }
+        .chart-container { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 16px; padding: 1.5rem; }
+        #barChart, #pieChart { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 1rem; margin-bottom: 2rem; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>📊 Test Grafik Hasil Pemilihan</h2>
+        <div class="chart-container">
+            <div id="barChart" style="height: 400px;"></div>
+            <div id="pieChart" style="height: 400px;"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+        // Sample data
+        const candidates = [
+            { number: 1, name: "CHANDRA", votes: 3 },
+            { number: 2, name: "DIM", votes: 1 },
+            { number: 3, name: "MUNA", votes: 0 }
+        ];
+
+        const totalVotes = candidates.reduce((sum, c) => sum + c.votes, 0);
+        const chartData = candidates.map(c => ({
+            x: `No. ${c.number} - ${c.name}`,
+            y: c.votes
+        }));
+
+        const colors = ['#667eea', '#764ba2', '#10b981', '#f59e0b', '#ef4444'];
+
+        // Bar Chart
+        const barOptions = {
+            series: [{ name: 'Suara', data: chartData }],
+            chart: { type: 'bar', height: 400, toolbar: { show: true } },
+            colors: colors,
+            plotOptions: {
+                bar: { horizontal: false, columnWidth: '60%', borderRadius: 10 }
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: function (val) { return val + " suara"; },
+                offsetY: -20,
+                style: { fontSize: '14px', fontWeight: 'bold', colors: ["#333"] }
+            },
+            xaxis: {
+                categories: candidates.map(c => `No. ${c.number} - ${c.name}`),
+                title: { text: 'Kandidat', style: { fontSize: '16px', fontWeight: 'bold' } }
+            },
+            yaxis: {
+                title: { text: 'Jumlah Suara', style: { fontSize: '16px', fontWeight: 'bold' } }
+            },
+            title: {
+                text: 'Grafik Batang - Hasil Pemilihan',
+                align: 'center',
+                style: { fontSize: '18px', fontWeight: 'bold', color: '#1f2937' }
+            }
+        };
+
+        // Pie Chart
+        const pieOptions = {
+            series: candidates.map(c => c.votes),
+            chart: { type: 'pie', height: 400 },
+            labels: candidates.map(c => `No. ${c.number} - ${c.name}`),
+            colors: colors,
+            title: {
+                text: 'Diagram Pie - Persentase Suara',
+                align: 'center',
+                style: { fontSize: '18px', fontWeight: 'bold', color: '#1f2937' }
+            },
+            legend: { position: 'bottom' },
+            dataLabels: {
+                enabled: true,
+                formatter: function(val, opts) {
+                    const votes = opts.w.config.series[opts.seriesIndex];
+                    return votes + ' suara\n(' + val.toFixed(1) + '%)';
+                }
+            }
+        };
+
+        // Render charts
+        const barChart = new ApexCharts(document.querySelector("#barChart"), barOptions);
+        const pieChart = new ApexCharts(document.querySelector("#pieChart"), pieOptions);
+        
+        barChart.render();
+        pieChart.render();
+    </script>
+</body>
+</html>

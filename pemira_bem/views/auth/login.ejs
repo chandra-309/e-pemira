@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= typeof title !== 'undefined' ? title : 'E-Pemira' %></title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header class="header-simple">
+    <div class="container header-with-logos">
+      <div class="header-logos">
+          <img src="/img/logo-left-1.png" alt="Logo 1" class="logo-left logo-1" />
+          <img src="/img/logo-left-2.png" alt="Logo 2" class="logo-left logo-2" />
+      </div>
+      <h1><%= typeof title !== 'undefined' ? title : 'E-Pemira' %></h1>
+    </div>
+  </header>
+  <main class="main-full">
+    <div class="container">
+      <section class="hero">
+        <h1><%= typeof title !== 'undefined' ? title : 'Selamat Datang di E-Pemira' %></h1>
+        <p class="hero-subtitle"><%= typeof subtitle !== 'undefined' ? subtitle : 'Pemilihan Raya Ketua BEM Periode 2026/2027' %></p>
+      </section>
+
+      <% if (flash.error && flash.error.length) { %>
+        <div class="card" style="border-color:#fecaca;background:#fef2f2;color:#991b1b;"> <%= flash.error[0] %> </div>
+      <% } %>
+      <% if (flash.success && flash.success.length) { %>
+        <div class="card" style="border-color:#bbf7d0;background:#f0fdf4;color:#166534;"> <%= flash.success[0] %> </div>
+      <% } %>
+      
+      <div class="login-container">
+        <div class="login-card">
+          <div class="login-header">
+            <h1><%= typeof title !== 'undefined' ? title : 'Selamat Datang di E-Pemira' %></h1>
+            <p><%= typeof subtitle !== 'undefined' ? subtitle : 'Pemilihan Raya Ketua BEM Periode 2026/2027' %></p>
+          </div>
+
+          <form method="post" action="/login" class="login-form">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input type="text" id="username" name="username" class="input" required placeholder="Masukkan username Anda" />
+            </div>
+
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="password" id="password" name="password" class="input" required placeholder="Masukkan password Anda" />
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg login-btn">
+              <🔐 Masuk
+            </button>
+          </form>
+
+          <div class="login-warning">
+            <p><strong>Penting:</strong> Pastikan data yang Anda masukkan itu benar, Anda hanya bisa voting 1x</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer-full">
+    <div class="container" style="text-align:center; padding:1rem 0; color:#888; font-size:15px;">
+      &copy; <%= new Date().getFullYear() %> DEWAN PERWAKILAN MAHASISWA AKB. All rights reserved.
+    </div>
+  </footer>
+
+  <script src="/js/lightbox.js"></script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title><%= student ? 'Edit' : 'Tambah' %> Mahasiswa - E-Pemira</title>
+	<link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+	<aside class="sidebar">
+		<div class="sidebar-header">
+			<h2>E-Pemira</h2>
+		</div>
+		<nav class="sidebar-nav">
+			<a href="/admin" class="nav-item">
+				<span class="nav-icon">📊</span>
+				<span class="nav-text">Dashboard</span>
+			</a>
+			<a href="/admin/students" class="nav-item active">
+				<span class="nav-icon">👥</span>
+				<span class="nav-text">Data Mahasiswa</span>
+			</a>
+			<a href="/admin/candidates" class="nav-item">
+				<span class="nav-icon">🗳️</span>
+				<span class="nav-text">Daftar Kandidat</span>
+			</a>
+			<a href="/admin/stats" class="nav-item">
+				<span class="nav-icon">📈</span>
+				<span class="nav-text">Statistik</span>
+			</a>
+		</nav>
+		<div class="sidebar-footer">
+			<div class="user-info">
+				<span class="user-name"><%= user.name %></span>
+				<span class="user-role">Admin</span>
+			</div>
+			<form method="post" action="/logout" class="logout-form">
+				<input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : (locals && locals.csrfToken ? locals.csrfToken : '') %>">
+				<button type="submit" class="btn btn-outline btn-sm">Logout</button>
+			</form>
+		</div>
+	</aside>
+
+	<main class="main-with-sidebar">
+		<div class="container">
+			<% if (flash.error && flash.error.length) { %>
+				<div class="card" style="border-color:#fecaca;background:#fef2f2;color:#991b1b;"> <%= flash.error[0] %> </div>
+			<% } %>
+			<% if (flash.success && flash.success.length) { %>
+				<div class="card" style="border-color:#bbf7d0;background:#f0fdf4;color:#166534;"> <%= flash.success[0] %> </div>
+			<% } %>
+			
+			<div class="hero">
+				<h1><%= student ? 'Edit' : 'Tambah' %> Mahasiswa</h1>
+				<p><%= student ? 'Perbarui data mahasiswa' : 'Tambahkan mahasiswa baru ke sistem' %></p>
+			</div>
+
+			<div class="card">
+				<form method="post" action="<%= student ? '/admin/students/' + student._id : '/admin/students' %>">
+					<% if (student) { %>
+						<input type="hidden" name="_method" value="PUT">
+					<% } %>
+					
+					<div class="form-group">
+						<label for="name">Nama Lengkap</label>
+						<input type="text" id="name" name="name" class="input" required value="<%= student ? student.name : '' %>" />
+					</div>
+
+					<div class="form-group">
+						<label for="username">Username</label>
+						<input type="text" id="username" name="username" class="input" required value="<%= student ? student.username : '' %>" />
+					</div>
+
+					<div class="form-group">
+						<label for="password">Password</label>
+						<input type="password" id="password" name="password" class="input" <%= student ? '' : 'required' %> />
+						<% if (student) { %>
+							<small>Kosongkan jika tidak ingin mengubah password</small>
+						<% } %>
+					</div>
+
+					<div class="form-group">
+						<label for="role">Role</label>
+						<select id="role" name="role" class="input">
+							<option value="peserta" <%= student && student.role === 'peserta' ? 'selected' : '' %>>Peserta</option>
+							<option value="admin" <%= student && student.role === 'admin' ? 'selected' : '' %>>Admin</option>
+						</select>
+					</div>
+
+					<div class="form-actions">
+						<button type="submit" class="btn btn-primary">
+							<%= student ? 'Update Mahasiswa' : 'Tambah Mahasiswa' %>
+						</button>
+						<a href="/admin/students" class="btn btn-outline">Batal</a>
+					</div>
+				</form>
+			</div>
+		</div>
+	</main>
+
+	   <footer class="footer-with-sidebar">
+		   <div class="container" style="text-align:center; padding:1rem 0; color:#888; font-size:15px;">
+			   &copy; <%= new Date().getFullYear() %> DEWAN PERWAKILAN MAHASISWA AKB. All rights reserved.
+		   </div>
+	   </footer>
+
+	<script src="/js/lightbox.js"></script>
+</body>
+</html>

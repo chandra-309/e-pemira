@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Pengaturan - E-Pemira</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>E-Pemira</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/admin" class="nav-item">Dashboard</a>
+      <a href="/admin/settings" class="nav-item active">Pengaturan</a>
+    </nav>
+  </aside>
+  <main class="main-with-sidebar">
+    <div class="container">
+      <h1>Edit Pengaturan Pemilihan</h1>
+      <% if (flash.success && flash.success.length) { %>
+        <div class="card" style="background:#f0fdf4;color:#166534;"> <%= flash.success[0] %> </div>
+      <% } %>
+      <form method="post" action="/admin/settings">
+        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : (locals && locals.csrfToken ? locals.csrfToken : '') %>">
+        <div class="form-group">
+          <label for="title">Judul Kegiatan</label>
+          <input type="text" id="title" name="title" value="<%= title %>" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label for="subtitle">Subjudul</label>
+          <input type="text" id="subtitle" name="subtitle" value="<%= subtitle %>" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label for="orgName">Nama Organisasi (misal: BEM, Badan Eksekutif Mahasiswa)</label>
+          <input type="text" id="orgName" name="orgName" value="<%= orgName %>" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Konfirmasi Voting - E-Pemira</title>
+	<link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+	<aside class="sidebar">
+		<div class="sidebar-header">
+			<h2>E-Pemira</h2>
+		</div>
+		<nav class="sidebar-nav">
+			<a href="/voting" class="nav-item">
+				<span class="nav-icon">🗳️</span>
+				<span class="nav-text">Voting</span>
+			</a>
+		</nav>
+		<div class="sidebar-footer">
+			<div class="user-info">
+				<span class="user-name"><%= user.name %></span>
+				<span class="user-role">Mahasiswa</span>
+			</div>
+			<form method="post" action="/logout" class="logout-form">
+				<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+				<button type="submit" class="btn btn-outline btn-sm">Logout</button>
+			</form>
+		</div>
+	</aside>
+
+	<main class="main-with-sidebar">
+		<div class="container">
+			<% if (flash.error && flash.error.length) { %>
+				<div class="card" style="border-color:#fecaca;background:#fef2f2;color:#991b1b;"> <%= flash.error[0] %> </div>
+			<% } %>
+			<% if (flash.success && flash.success.length) { %>
+				<div class="card" style="border-color:#bbf7d0;background:#f0fdf4;color:#166534;"> <%= flash.success[0] %> </div>
+			<% } %>
+			
+			<div class="hero">
+				<h1>Konfirmasi Voting</h1>
+				<p>Pastikan pilihan Anda sudah benar sebelum mengirim</p>
+			</div>
+
+			<div class="confirmation-card">
+				<div class="candidate-confirmation">
+					<div class="candidate-number">No. <%= candidate.number %></div>
+					<img src="<%= candidate.photoPath || '/img/placeholder.svg' %>" data-lightbox alt="<%= candidate.name %>" class="candidate-photo-large" />
+					<h2><%= candidate.name %></h2>
+					
+					<div class="candidate-details">
+						<div class="visi-misi">
+							<h3>Visi:</h3>
+							<p><%= candidate.visi %></p>
+						</div>
+						<div class="visi-misi">
+							<h3>Misi:</h3>
+							<p><%= candidate.misi %></p>
+						</div>
+					</div>
+				</div>
+
+				<div class="confirmation-actions">
+					<form method="post" action="/voting">
+						<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+						<input type="hidden" name="candidateId" value="<%= candidate._id %>">
+						<button type="submit" class="btn btn-primary btn-lg">
+							✅ Konfirmasi & Kirim Voting
+						</button>
+					</form>
+					<a href="/voting" class="btn btn-outline btn-lg">
+						❌ Batal & Kembali
+					</a>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	   <footer class="footer-with-sidebar">
+		   <div class="container" style="text-align:center; padding:1rem 0; color:#888; font-size:15px;">
+			   &copy; <%= new Date().getFullYear() %> DEWAN PERWAKILAN MAHASISWA AKB. All rights reserved.
+		   </div>
+	   </footer>
+
+	<script src="/js/lightbox.js"></script>
+</body>
+</html>

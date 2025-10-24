@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Dashboard Admin - E-Pemira</title>
+	<link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+	<aside class="sidebar">
+		<div class="sidebar-header">
+			<div class="header-logos">
+				<img src="/img/logo-left-1.png" alt="Logo 1" class="logo-left logo-1" />
+				<img src="/img/logo-left-2.png" alt="Logo 2" class="logo-left logo-2" />
+			</div>
+			<h2>E-Pemira</h2>
+		</div>
+		<nav class="sidebar-nav">
+		       <a href="/admin" class="nav-item active">
+			       <span class="nav-icon">📊</span>
+			       <span class="nav-text">Dashboard</span>
+		       </a>
+		       <a href="/admin/students" class="nav-item">
+			       <span class="nav-icon">👥</span>
+			       <span class="nav-text">Data Mahasiswa</span>
+		       </a>
+		       <a href="/admin/candidates" class="nav-item">
+			       <span class="nav-icon">🗳️</span>
+			       <span class="nav-text">Daftar Kandidat</span>
+		       </a>
+		       <a href="/admin/stats" class="nav-item">
+			       <span class="nav-icon">📈</span>
+			       <span class="nav-text">Statistik</span>
+		       </a>
+		       <a href="/admin/settings" class="nav-item">
+			       <span class="nav-icon">⚙️</span>
+			       <span class="nav-text">Pengaturan</span>
+		       </a>
+		</nav>
+		<div class="sidebar-footer">
+			<div class="user-info">
+				<span class="user-name"><%= user.name %></span>
+				<span class="user-role">Admin</span>
+			</div>
+			<form method="post" action="/logout" class="logout-form">
+				<input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : (locals && locals.csrfToken ? locals.csrfToken : '') %>">
+				<button type="submit" class="btn btn-outline btn-sm">Logout</button>
+			</form>
+		</div>
+	</aside>
+
+	<main class="main-with-sidebar">
+		<div class="container">
+			<% if (flash.error && flash.error.length) { %>
+				<div class="card" style="border-color:#fecaca;background:#fef2f2;color:#991b1b;"> <%= flash.error[0] %> </div>
+			<% } %>
+			<% if (flash.success && flash.success.length) { %>
+				<div class="card" style="border-color:#bbf7d0;background:#f0fdf4;color:#166534;"> <%= flash.success[0] %> </div>
+			<% } %>
+			
+			<div class="hero">
+				<h1>Dashboard Admin</h1>
+				   <p>Kelola sistem pemilihan ketua <%= orgName %> periode 2026/2027</p>
+			</div>
+
+			<div class="stats-grid">
+				<div class="stat-card">
+					<div class="stat-icon">👥</div>
+					<div class="stat-content">
+						<h3>Total Mahasiswa</h3>
+						<div class="stat-number"><%= totalVoters %></div>
+						<p class="stat-description">Terdaftar dalam sistem</p>
+					</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-icon">🗳️</div>
+					<div class="stat-content">
+						<h3>Sudah Voting</h3>
+						<div class="stat-number"><%= totalVoted %></div>
+						<p class="stat-description">Telah menggunakan hak suara</p>
+					</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-icon">📊</div>
+					<div class="stat-content">
+						<h3>Persentase</h3>
+						<div class="stat-number"><%= totalVoters > 0 ? Math.round((totalVoted / totalVoters) * 100) : 0 %>%</div>
+						<p class="stat-description">Tingkat partisipasi</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="card">
+				<h2>Menu Admin</h2>
+				<div class="admin-menu">
+					<a href="/admin/students" class="admin-menu-item">
+						<span class="menu-icon">👥</span>
+						<div class="menu-content">
+							<h3>Data Mahasiswa</h3>
+							<p>Kelola data mahasiswa dan status voting</p>
+						</div>
+					</a>
+					<a href="/admin/candidates" class="admin-menu-item">
+						<span class="menu-icon">🗳️</span>
+						<div class="menu-content">
+							<h3>Daftar Kandidat</h3>
+							<p>Kelola data kandidat dan foto</p>
+						</div>
+					</a>
+					<a href="/admin/stats" class="admin-menu-item">
+						<span class="menu-icon">📈</span>
+						<div class="menu-content">
+							<h3>Statistik</h3>
+							<p>Lihat hasil pemilihan dan grafik</p>
+						</div>
+					</a>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	   <footer class="footer-with-sidebar">
+		   <div class="container" style="text-align:center; padding:1rem 0; color:#888; font-size:15px;">
+			   &copy; <%= new Date().getFullYear() %> DEWAN PERWAKILAN MAHASISWA AKB. All rights reserved.
+		   </div>
+	   </footer>
+
+	<script src="/js/lightbox.js"></script>
+</body>
+</html>

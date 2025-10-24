@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Statistik - E-Pemira</title>
+	<link rel="stylesheet" href="/css/styles.css" />
+	<style>
+		.chart-container {
+			background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+			border-radius: 16px;
+			padding: 1.5rem;
+			box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+		}
+		.chart-title {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			font-weight: 800;
+			margin-bottom: 1.5rem;
+			text-align: center;
+		}
+		#barChart, #pieChart {
+			background: white;
+			border-radius: 12px;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+			padding: 1rem;
+		}
+	</style>
+</head>
+<body>
+	<aside class="sidebar">
+		<div class="sidebar-header">
+			<div class="header-logos">
+				<img src="/img/logo-left-1.png" alt="Logo 1" class="logo-left logo-1" />
+				<img src="/img/logo-left-2.png" alt="Logo 2" class="logo-left logo-2" />
+			</div>
+			<h2>E-Pemira</h2>
+		</div>
+		<nav class="sidebar-nav">
+			<a href="/admin" class="nav-item">
+				<span class="nav-icon">📊</span>
+				<span class="nav-text">Dashboard</span>
+			</a>
+			<a href="/admin/students" class="nav-item">
+				<span class="nav-icon">👥</span>
+				<span class="nav-text">Data Mahasiswa</span>
+			</a>
+			<a href="/admin/candidates" class="nav-item">
+				<span class="nav-icon">🗳️</span>
+				<span class="nav-text">Daftar Kandidat</span>
+			</a>
+			<a href="/admin/stats" class="nav-item active">
+				<span class="nav-icon">📈</span>
+				<span class="nav-text">Statistik</span>
+			</a>
+		</nav>
+		<div class="sidebar-footer">
+			<div class="user-info">
+				<span class="user-name"><%= user.name %></span>
+				<span class="user-role">Admin</span>
+			</div>
+			<form method="post" action="/logout" class="logout-form">
+				<input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : (locals && locals.csrfToken ? locals.csrfToken : '') %>">
+				<button type="submit" class="btn btn-outline btn-sm">Logout</button>
+			</form>
+		</div>
+	</aside>
+
+	<main class="main-with-sidebar">
+		<div class="container">
+			<% if (flash.error && flash.error.length) { %>
+				<div class="card" style="border-color:#fecaca;background:#fef2f2;color:#991b1b;"> <%= flash.error[0] %> </div>
+			<% } %>
+			<% if (flash.success && flash.success.length) { %>
+				<div class="card" style="border-color:#bbf7d0;background:#f0fdf4;color:#166534;"> <%= flash.success[0] %> </div>
+			<% } %>
+			
+			<div class="hero">
+				<h1>Statistik Voting</h1>
+				   <p>Hasil pemilihan ketua <%= orgName %> periode 2026/2027</p>
+				<div class="hero-actions">
+					<a href="/admin/export-excel" class="btn btn-success">
+						📊 Export to Excel
+					</a>
+					<form method="post" action="/admin/reset-data" onsubmit="return confirm('Apakah Anda yakin ingin mereset semua data voting? Tindakan ini tidak dapat dibatalkan!')" style="display: inline;">
+						<button type="submit" class="btn btn-danger">
+							🔄 Reset Data Voting
+						</button>
+					</form>
+				</div>
+			</div>
+
+			<div class="card">
+				<h2 class="chart-title">📊 Grafik Hasil Pemilihan</h2>
+				<div class="chart-container">
+					<div id="barChart" style="height: 400px; margin-bottom: 2rem;"></div>
+					<div id="pieChart" style="height: 400px;"></div>
+				</div>
+			</div>
+
+			<div class="stats-grid">
+				<% candidates.forEach(candidate => { %>
+					<div class="stat-card">
+						<div class="candidate-info">
+							<img src="<%= candidate.photo ? '/uploads/' + candidate.photo : '/img/placeholder.svg' %>" alt="<%= candidate.name %>" class="candidate-photo" onerror="this.src='/img/placeholder.svg'" />
+							<div class="candidate-details">
+								<h3>No. <%= candidate.number %> - <%= candidate.name %></h3>
+								<div class="vote-count">
+									<span class="vote-number"><%= candidate.votes %></span>
+									<span class="vote-label">suara</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				<% }); %>
+			</div>
+		</div>
+	</main>
+
+	   <footer class="footer-with-sidebar">
+		   <div class="container" style="text-align:center; padding:1rem 0; color:#888; font-size:15px;">
+			   &copy; <%= new Date().getFullYear() %> DEWAN PERWAKILAN MAHASISWA AKB. All rights reserved.
+		   </div>
+	   </footer>
+
+	<script src="/js/lightbox.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+	<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		try {
+			const candidates = <%- JSON.stringify(candidates) %>;
+			console.log('Candidates data:', candidates);
+			
+			if (!candidates || candidates.length === 0) {
+				document.getElementById('barChart').innerHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280; font-size: 18px;">📊 Belum ada data kandidat untuk ditampilkan</div>';
+				document.getElementById('pieChart').innerHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280; font-size: 18px;">🥧 Belum ada data untuk diagram pie</div>';
+				return;
+			}
+			
+			// Prepare data
+			const totalVotes = candidates.reduce((sum, c) => sum + (c.votes || 0), 0);
+			const chartData = candidates.map(c => ({
+				x: `No. ${c.number} - ${c.name}`,
+				y: c.votes || 0
+			}));
+			
+			const colors = ['#667eea', '#764ba2', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#f97316'];
+			
+			// Bar Chart Options
+			const barOptions = {
+				series: [{
+					name: 'Suara',
+					data: chartData
+				}],
+				chart: {
+					type: 'bar',
+					height: 500,
+					toolbar: {
+						show: true
+					}
+				},
+				colors: colors,
+				plotOptions: {
+					bar: {
+						horizontal: false,
+						columnWidth: '60%',
+						borderRadius: 10,
+						dataLabels: {
+							position: 'top'
+						}
+					}
+				},
+				dataLabels: {
+					enabled: true,
+					formatter: function (val) {
+						return val + " suara";
+					},
+					offsetY: -20,
+					style: {
+						fontSize: '14px',
+						fontWeight: 'bold',
+						colors: ["#333"]
+					}
+				},
+				xaxis: {
+					categories: candidates.map(c => `${c.name}`),
+					title: {
+						text: 'Nama Kandidat',
+						style: {
+							fontSize: '16px',
+							fontWeight: 'bold'
+						}
+					},
+					labels: {
+						style: {
+							fontSize: '14px',
+							fontWeight: 'bold'
+						}
+					}
+				},
+				yaxis: {
+					title: {
+						text: 'Jumlah Suara',
+						style: {
+							fontSize: '16px',
+							fontWeight: 'bold'
+						}
+					},
+					labels: {
+						formatter: function (val) {
+							return Math.floor(val);
+						},
+						style: {
+							fontSize: '14px'
+						}
+					}
+				},
+				title: {
+					text: 'Grafik Batang - Hasil Pemilihan',
+					align: 'center',
+					style: {
+						fontSize: '18px',
+						fontWeight: 'bold',
+						color: '#1f2937'
+					}
+				},
+			grid: {
+				borderColor: '#e2e8f0',
+				strokeDashArray: 4
+			},
+			tooltip: {
+				y: {
+					formatter: function (val) {
+						return val + " suara";
+					}
+				}
+			}
+		};
+			// Render Bar Chart
+			const barChart = new ApexCharts(document.querySelector("#barChart"), barOptions);
+			barChart.render();
+			
+			// Pie Chart Options
+			const pieOptions = {
+				series: candidates.map(c => c.votes || 0),
+				chart: {
+					type: 'pie',
+					height: 400
+				},
+				labels: candidates.map(c => `No. ${c.number} - ${c.name}`),
+				colors: colors,
+				title: {
+					text: 'Diagram Pie - Persentase Suara',
+					align: 'center',
+					style: {
+						fontSize: '18px',
+						fontWeight: 'bold',
+						color: '#1f2937'
+					}
+				},
+				legend: {
+					position: 'bottom',
+					horizontalAlign: 'center'
+				},
+				plotOptions: {
+					pie: {
+						dataLabels: {
+							offset: -5
+						}
+					}
+				},
+				dataLabels: {
+					enabled: true,
+					formatter: function(val, opts) {
+						const votes = opts.w.config.series[opts.seriesIndex];
+						return votes + ' suara\n(' + val.toFixed(1) + '%)';
+					},
+					style: {
+						fontSize: '12px',
+						fontWeight: 'bold'
+					}
+				},
+				tooltip: {
+					y: {
+						formatter: function(val) {
+							const percentage = totalVotes > 0 ? ((val / totalVotes) * 100).toFixed(1) : 0;
+							return val + ' suara (' + percentage + '%)';
+						}
+					}
+				}
+			};
+			
+			// Render Pie Chart
+			const pieChart = new ApexCharts(document.querySelector("#pieChart"), pieOptions);
+			pieChart.render();
+		} catch (error) {
+			console.error('Error rendering chart:', error);
+			document.getElementById('barChart').innerHTML = '<div style="text-align: center; padding: 2rem; color: #ef4444; font-size: 16px;">❌ Terjadi kesalahan saat memuat grafik batang. Silakan refresh halaman.</div>';
+			document.getElementById('pieChart').innerHTML = '<div style="text-align: center; padding: 2rem; color: #ef4444; font-size: 16px;">❌ Terjadi kesalahan saat memuat diagram pie. Silakan refresh halaman.</div>';
+		}
+	});
+	</script>
+</body>
+</html>

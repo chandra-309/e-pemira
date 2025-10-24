@@ -1,0 +1,37 @@
+{
+  "name": "pemira-bem",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/server.js",
+  "description": "E-Pemira voting system",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "seed": "node src/seed.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "compression": "^1.8.1",
+    "connect-flash": "^0.1.1",
+    "connect-mongo": "^5.1.0",
+    "cookie-parser": "^1.4.7",
+    "csurf": "^1.11.0",
+    "dotenv": "^17.2.2",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "helmet": "^8.1.0",
+    "method-override": "^3.0.0",
+    "mongoose": "^8.18.2",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "uuid": "^13.0.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
